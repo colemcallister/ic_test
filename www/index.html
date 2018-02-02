@@ -626,6 +626,48 @@ ul.music_list {
 <body>
 <!--HTML-->
 <script src="cordova.js"></script>
+<script type="text/javascript">
+    var app = {
+        // Application Constructor
+        initialize: function() {
+            this.bindEvents();
+        },
+        // Bind Event Listeners
+        //
+        // Bind any events that are required on startup. Common events are:
+        // 'load', 'deviceready', 'offline', and 'online'.
+        bindEvents: function() {
+            document.addEventListener('deviceready', this.onDeviceReady, false);
+        },
+        // deviceready Event Handler
+        //
+        // The scope of 'this' is the event. In order to call the 'receivedEvent'
+        // function, we must explicitly call 'app.receivedEvent(...);'
+        onDeviceReady: function() {
+            app.receivedEvent('deviceready');
+        },
+        // Update DOM on a Received Event
+        receivedEvent: function(id) {
+            var parentElement = document.getElementById(id);
+            var listeningElement = parentElement.querySelector('.listening');
+            var receivedElement = parentElement.querySelector('.received');
+
+            listeningElement.setAttribute('style', 'display:none;');
+            receivedElement.setAttribute('style', 'display:block;');
+
+            console.log('Received Event: ' + id);
+
+            if (window.ga) {
+                window.ga.startTrackerWithId('UA-113456233-1', 30);
+                window.ga.trackView('Home');
+                window.ga.trackEvent('Home', 'DeviceReady', 'Hits', 1);
+            }
+        }
+    };
+</script>
+<script type="text/javascript">
+    app.initialize();
+</script>
 <!--PAGES-->
 <script>GLOBAL_JS_PAGE_OBJECTS = []</script>
 <div id="page-holder">
@@ -1643,7 +1685,7 @@ var carousel_pages = [
     /*--------------------------------------------------------*/
     Playlist.prototype.page_will_unload = function()
     {
-        console.log(" will unload playlist");
+        console.log("playlist will unload");
     };
 
     /*--------------------------------------------------------*/
@@ -1655,7 +1697,7 @@ var carousel_pages = [
     /*--------------------------------------------------------*/
     Playlist.prototype.page_did_unload = function()
     {
-        console.log(" will unload playlist");
+        console.log("playlist did unload");
     };
 
     /*--------------------------------------------------------*/
@@ -1667,7 +1709,7 @@ var carousel_pages = [
     /*--------------------------------------------------------*/
     Playlist.prototype.user_did_select_song = function(url)
     {
-        rollkick_template.load_song(url);
+      rollkick_template.load_song(url);
     };
 
     Playlist.prototype.onPlaylistItemSelected = function(fileLocation, fileName) {
@@ -2445,7 +2487,7 @@ var carousel_pages = [
 /FOR_BUILD_ONLY-->
 <script>
 
-var $VERSION = "27 Jan 2018 19:53:05";
+var $VERSION = "02 Feb 2018 4:35:34";
 
 /**** ALL JS ****/
 var $ROUTINES = {"Toe Taps":{"type":"rollkick","video":"videos\/toe_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Ball Taps Clock":{"type":"rollkick","video":"videos\/ball_taps_clock.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Brazilian Sole Flicks":{"type":"rollkick","video":"videos\/brazilian_sole_flicks.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":20,"min_duration":0.3,"speedometer_num_text":"FLICKS","speedometer_level_text":"flicks","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Forward Backward Rolls":{"type":"rollkick","video":"videos\/forward_backward_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals"},"Left Right Front Rolls":{"type":"rollkick","video":"videos\/left_right_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals"},"Pull Back Taps":{"type":"rollkick","video":"videos\/pull_back_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":4,"mode":0,"menu_parent":"Fundamentals"},"Irish Jig":{"type":"rollkick","video":"videos\/irish_jig.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Single Leg V Taps":{"type":"rollkick","video":"videos\/single_leg_v_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"Vs","speedometer_level_text":"vs","divide_by":4,"mode":0,"menu_parent":"Fundamentals"},"Wall Kicks":{"type":"rollkick","video":"videos\/wall_kicks.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.3,"speedometer_num_text":"KICKS","speedometer_level_text":"kicks","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Penalty Kicks":{"type":"flightkick","video":"videos\/penalty_kicks.mp4","menu_parent":"Kicks","flightkick_mode":"freekick"},"In Out Dribbling":{"type":"cones","video":"videos\/in_out_dribbling.mp4","menu_parent":"Dribbling"},"Virtual Coach":{"type":"freeplay","video":"videos\/free_play.mp4","menu_parent":"Dribbling"},"2-Person Passes":{"type":"rollkick","video":"videos\/2_person_passes.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.5,"speedometer_num_text":"PASSES","speedometer_level_text":"passes","divide_by":1,"mode":1,"menu_parent":"Kicks"}};
@@ -3423,6 +3465,7 @@ function Audio_File_Player(filename, audio_element_id, should_loop, should_autop
   //this.gain_filter_coeff = 0.001;
   //this.one_minus_gain_filter_coeff = 1 - this.gain_filter_coeff;
   
+  this.tried_to_play_before_load = false;
   this.should_auto_play = should_autoplay;
   this.cordova_media  = null;
   this.loop           = should_loop;
@@ -3555,8 +3598,11 @@ Audio_File_Player.prototype.file_opened_callback = function(event)
       global_audio_context.decodeAudioData(request.response, function(buffer)
         {
           this.audio_buffer = buffer;
-          if(this.should_auto_play)
-            this.play();
+          if(this.should_auto_play || this.tried_to_play_before_load)
+            {
+              this.play();
+              this.tried_to_play_before_load = false;
+            }
         }.bind(this));
       //var source = global_audio_context.createBufferSource();
       //source.buffer = this.audio_buffer;
@@ -3601,15 +3647,19 @@ Audio_File_Player.prototype.play = function()
 {
   if(this.source_type == "buffer")
   {
-    var source = global_audio_context.createBufferSource();
-    source.loop = this.loop;
-    //todo: how to remove the old node?
-    
-    if(source !== null) // didn't load yet
+    if(this.audio_buffer !== null)
       {
+        var source = global_audio_context.createBufferSource();
+        source.loop = this.loop;
         source.buffer = this.audio_buffer;
+        //todo: how to remove the old node?
         this.connect_audio_source_to_graph(source);
         this.audio_source.start();
+      }
+    else // didn't load yet
+      {
+        this.tried_to_play_before_load = true;
+        console.log("tried_to_play_before_load");
       }
     }
   else if(this.source_type == "cordova")
@@ -5979,7 +6029,7 @@ Rollkick_Page_Template.prototype.page_load = function(name, video_path, kicks_le
   //this.transport.connect_to_IC(name);
   //this.speech_log.display("Start when you are ready.");
   
-  this.play_audio_file();
+  this.audio_player.play();
   //this.transport.play();
 
   this.mode = mode;
@@ -5995,7 +6045,7 @@ Rollkick_Page_Template.prototype.page_load = function(name, video_path, kicks_le
 /*--------------------------------------------------------------------*/
 Rollkick_Page_Template.prototype.load_song = function(url)
 {
-  this.audio_player = new Audio_File_Player(url, this.audio_player_id, true);
+  this.audio_player = new Audio_File_Player(url, this.audio_player_id, true, false);
 };
 
 /*--------------------------------------------------------------------*/
@@ -6010,7 +6060,7 @@ Rollkick_Page_Template.prototype.page_will_unload = function()
   this.time_dial.stop_updating();
   //this.transport.stop();
   //this.transport.disconnect_from_IC(this.name);
-  this.stop_audio_file();
+  this.audio_player.stop();
 };
 
 /*--------------------------------------------------------------------*/
@@ -6225,34 +6275,6 @@ Rollkick_Page_Template.prototype.set_audio_volume = function(vol)
       vol = Math.pow(2, vol);
     }
   this.audio_player.set_gain(vol);
-};
-
-/*--------------------------------------------------------------------*/
-Rollkick_Page_Template.prototype.stop_audio_file = function(element_id)
-{
-  this.audio_player.stop();
-};
-
-/*--------------------------------------------------------------------*/
-Rollkick_Page_Template.prototype.play_audio_file = function()
-{
-/*
-  //THE canplay EVENT WILL NOT BE TRIGGERD ON IPHONE FOR DYNAMICALLY CREATED ELEMENTS,
-  //AND IF THE USER DOES NOT CLICK ON A BUTTON TO PLAY THE SOUND
-  //THIS WORKAROUND WORKS SINCE WE HAVE ONLY 1 AUDIO FILE.
-  
-  if(this.audio_player.addEventListener)
-    this.audio_player.addEventListener("canplay", rollkick_page_template_audio_file_loaded, false);
-
-  else if(this.audio_player.attachEvent)
-    this.audio_player.attachEvent("oncanplay", rollkick_page_template_audio_file_loaded);
-  else
-    this.audio_player["oncanplay"] = rollkick_page_template_audio_file_loaded;
-    
-  this.audio_player.innerHTML = "<source src='" + filename + "' type='audio/mpeg' />"
-*/
-
-  this.audio_player.play();
 };
 
 /*--------------------------------------------------------------------*/  
