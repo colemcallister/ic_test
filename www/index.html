@@ -572,7 +572,7 @@ ul.music_list {
   appearance: none;
   width: 25px;
   height: 25px;
-  background: #4caf50;
+  background: #025fbc;
   cursor: pointer; }
 
 .video_modal_widget {
@@ -3077,8 +3077,8 @@ var carousel_pages = [
 </script>
 <div id="page-my-stats" class="page">
     <canvas id="myChart" width="400" height="400"></canvas>
-    <label id="numberOfSessions">1</label>
-    <input class="slider" id="slider1" value=1 type="range" min="1" max="31" step="1"  />
+    <label id="numberOfSessions">5</label>
+    <input class="slider" id="slider1" value=5 type="range" min="1" max="31" step="1"  />
 </div>
 
 <script>
@@ -3123,6 +3123,7 @@ var carousel_pages = [
         //TODO put this in a global space so it's only called once on load of app
         //TODO need to figure out the correct size of the tap area
         Chart.defaults.global.elements.point.hitRadius = 10; //needed to make it so the hit area on phone works
+        Chart.defaults.global.animation.duration = 0;
 
         var labels = ["Jan 1", "Jan 2", "Jan 3", "Jan 4", "Jan 5", "Jan 6", "Jan 7", "Jan 8", "Jan 9", "Jan 10", "Jan 11", "Jan 12", "Jan 13", "Jan 14", "Jan 15", "Jan 16", "Jan 17", "Jan 18", "Jan 19", "Jan 20", "Jan 21", "Jan 22", "Jan 23", "Jan 24", "Jan 25", "Jan 26", "Jan 27", "Jan 28", "Jan 29", "Jan 30", "Jan 31"];
         var dataSet1 = [12, 19, 3, 5, 2, 3, 7, 4, 8, 3, 5, 2, 3, 7, 4, 8, 2, 11, 20, 3, 7, 2, 11, 20, 12, 19, 4, 8, 2, 11, 2];
@@ -3157,7 +3158,7 @@ var carousel_pages = [
                         display: true,
                         scaleLabel: {
                             display: true, //Needed so that when there are many labels, we only get those that fit
-                            labelString: 'Date'
+                            labelString: '' //We don't want one because it's obvious
                         }
                     }],
                     yAxes: [{
@@ -3212,6 +3213,18 @@ var carousel_pages = [
 
             console.log ("Test" + number);
         };
+
+
+        //TODO make this a method....
+        var sliderNumber = parseInt(slider1.value);
+        var start = 31 - sliderNumber;
+
+        myLineChart.data.labels = labels.slice(start, 31);
+
+        myLineChart.data.datasets[0].data = dataSet1.slice(start, 31);
+        myLineChart.data.datasets[1].data = dataSet2.slice(start, 31);
+
+        myLineChart.update();
 
     };
 
@@ -4329,7 +4342,7 @@ var carousel_pages = [
 /FOR_BUILD_ONLY-->
 <script>
 
-var $VERSION = "06 Mar 2018 4:04:21";
+var $VERSION = "06 Mar 2018 4:15:07";
 
 /**** ALL JS ****/
 var $ROUTINES = {"Toe Taps":{"type":"rollkick","video":"videos\/toe_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Ball Taps Clock":{"type":"rollkick","video":"videos\/ball_taps_clock.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Brazilian Sole Flicks":{"type":"rollkick","video":"videos\/brazilian_sole_flicks.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":20,"min_duration":0.3,"speedometer_num_text":"FLICKS","speedometer_level_text":"flicks","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Forward Backward Rolls":{"type":"rollkick","video":"videos\/forward_backward_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals"},"Left Right Front Rolls":{"type":"rollkick","video":"videos\/left_right_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals"},"Pull Back Taps":{"type":"rollkick","video":"videos\/pull_back_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":4,"mode":0,"menu_parent":"Fundamentals"},"Irish Jig":{"type":"rollkick","video":"videos\/irish_jig.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Single Leg V Taps":{"type":"rollkick","video":"videos\/single_leg_v_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"Vs","speedometer_level_text":"vs","divide_by":4,"mode":0,"menu_parent":"Fundamentals"},"Wall Kicks":{"type":"rollkick","video":"videos\/wall_kicks.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.3,"speedometer_num_text":"KICKS","speedometer_level_text":"kicks","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Penalty Kicks":{"type":"flightkick","video":"videos\/penalty_kicks.mp4","menu_parent":"Kicks","flightkick_mode":"freekick"},"In Out Dribbling":{"type":"cones","video":"videos\/in_out_dribbling.mp4","menu_parent":"Dribbling"},"Virtual Coach":{"type":"freeplay","video":"videos\/free_play.mp4","menu_parent":"Dribbling"},"2-Person Passes":{"type":"rollkick","video":"videos\/2_person_passes.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.5,"speedometer_num_text":"PASSES","speedometer_level_text":"passes","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Funny Sounds":{"type":"funny sounds","menu_parent":"Dribbling"},"Passkick":{"type":"passkick","menu_parent":"Kicks"},"Topspin":{"type":"topspin","menu_parent":"Kicks"},"Force Kick":{"type":"forcekick","menu_parent":"Kicks"}};
