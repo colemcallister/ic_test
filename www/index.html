@@ -575,6 +575,9 @@ ul.music_list {
   background: #025fbc;
   cursor: pointer; }
 
+.flex-box {
+  display: flex; }
+
 .video_modal_widget {
   background-image: url("widgets/video_modal/play_video.svg");
   background-size: 1.5em 1.5em;
@@ -1692,6 +1695,7 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
           <ul>
             <li><a href="#" onclick="navigation_load_page('diagnostic')">Ball Diagnostic</a></li>
             <li><a href="#" onclick="navigation_load_page('setup-guide')">Setup Guide</a></li>
+            <li><a href="#" onclick="navigation_load_page('wifi-credentials')">Wifi Credentials</a></li>
           </ul>
         </li>
         <li class="player-settings-icon dropdown-item"><a href="#">Player Settings</a>
@@ -1704,6 +1708,126 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
       </ul>
     </div>
   </div>
+<div id="page-wifi-credentials" class="page">
+  <form class="server-form" id="wifi_credentials_form" onsubmit="return false">
+    <img class="avatar-circle" src="images/default_profile_image.png" alt="IC">
+    <input type="text"     class="input-field" id="ball_wifi_name" placeholder="Ball Wifi Name" name="ssid">
+    <input type="password" class="input-field" id="ball_wifi_password" placeholder="Password" name="password">
+    <input type="password" class="input-field" id="ball_wifi_password_repeat" placeholder="Repeat Password" name="repeat_password">
+    <button type="submit"  id="wifi_credentials_submit_button" name="submit" class="input-field button" onclick="wifi_credentials_page.update_credentials(event, this.form);">Update Credentials</button>
+    <div class="secondary-form-button" onclick="navigation_load_page('recover-ball-password');">
+      <a href="#">I forgot my ball&apos;s wifi password</a>
+    </div>
+    <div class="secondary-form-button" onclick="navigation_go_back();">
+      <a href="#">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+   var wifi_credentials_page = new WifiCredentials();
+   GLOBAL_JS_PAGE_OBJECTS["wifi-credentials"] = {id:"page-wifi-credentials", obj:wifi_credentials_page};
+   
+  /*--------------------------------------------------------*/
+  function WifiCredentials()
+  {
+    this.submit = null;
+  }
+
+  /*--------------------------------------------------------*/
+  WifiCredentials.prototype.page_will_unload = function()
+  {
+    ball_status.stop_receiving_connection_notice();
+  };
+
+  /*--------------------------------------------------------*/
+  WifiCredentials.prototype.page_load = function()
+  {
+    ball_status.receive_connection_notice(this.onopen.bind(this));
+    $IC.start_tracking();
+  };
+      
+  /*--------------------------------------------------------*/
+  WifiCredentials.prototype.page_did_unload = function()
+  {
+    navigation_clear_form("wifi_credentials_form");
+    if(this.submit !== null)
+      server_reactivate_button(this.submit);
+  };
+
+  /*--------------------------------------------------------*/
+  WifiCredentials.prototype.clear = function()
+  {
+
+  };
+
+  /*--------------------------------------------------------*/
+  WifiCredentials.prototype.update_credentials = function(e, form)
+  {
+    e = e || window.event;
+    if(e) e.preventDefault();
+  
+    $IC.start_tracking(); //try to connect if not already connected
+  
+    if(!$IC.is_connected())
+      {
+        server_generic_notify("You must be connected to the ball's wifi to update its password");
+        return;
+      }
+  
+    if((form.ssid.value.length < 2) || (form.ssid.value.length > 31))
+      {
+        server_generic_notify("Wifi name must be 2 to 32 characters long");
+        return;
+      }
+  
+    if(!server_validate_ascii_alpanum_and_notify(form.ssid.value, "Wifi Name"))
+      return;
+  
+    if((form.password.value.length < 8) || (form.password.value.length > 63))
+      {
+        server_generic_notify("password must be 8 to 63 characters long");
+        return;
+      }
+  
+    if(!server_validate_passwords_match_and_notify(form.password.value, form.repeat_password.value))
+      return;
+  
+    $IC.exec(
+      '$e,' +  // clear error count
+      ',$G00' + str2lenhex(form.ssid.value)   +
+      ',$G01' + str2lenhex(form.password.value)   +
+      ',$L:>uint8:err_values' +  //values error
+      ',$F01' + //save config to flash if no errors, if erros occured read flash
+      ',$L:>uint8:err_save'   //save error
+      , this.update_credentials_callback.bind(this)
+    );
+  
+    this.submit = form.submit;
+    server_inactivate_button(form.submit, 10000);
+  };
+
+  /*--------------------------------------------------------*/
+  WifiCredentials.prototype.update_credentials_callback = function(e)
+  {
+    server_reactivate_button(this.submit);
+  
+    if(e.err_values)
+      server_generic_notify("Invalid SSID/pass values");
+    else if(e.err_save)
+      server_generic_notify("Error saving your settings"); //should not happen
+    else
+      server_generic_notify("Success! Your new settings will take effect on next reboot (place and remove device from charging pad)");
+  };
+
+  /*--------------------------------------------------------*/
+  WifiCredentials.prototype.onopen = function()
+  {
+    $IC.stop_tracking();
+  };
+
+
+</script>
 <div id="page-change-password" class="page">
   <form class="server-form" id="change_password_form" onsubmit="return false">
     <img class="avatar-circle profile_image" src="images/default_profile_image.png" alt="IC">
@@ -1920,7 +2044,6 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
   Diagnostic.prototype.page_will_unload = function()
   {
     ball_status.stop_receiving_connection_notice();
-    console.log("unload diagnostic");
   }
 
   /*--------------------------------------------------------*/
@@ -1928,7 +2051,6 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
   {
     ball_status.receive_connection_notice(this.onopen.bind(this));
     this.run_test(null);
-    console.log("load diagnostic");
   }
       
   /*--------------------------------------------------------*/
@@ -1945,7 +2067,6 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
     var row = _row.cells;
     row[1].innerHTML = val;
     row[2].innerHTML = pass_fail;
-    
     row[2].style.color = (did_pass) ? "green" : "red";
   
     if(should_hide)
@@ -2511,7 +2632,7 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
 
     this.MAX_FORCE = 800;
     this.state = Forcekick.STATE_WAITING_TO_BECOME_CONNECTED;
-    this.speech_log  = new Speech_Log_Widget   ("speech_log_page_forcekick");
+    this.speech_log  = new Speech_Log_Widget ("speech_log_page_forcekick");
     this.speedometer = new Speedometer_Widget("distance_dial_page_forcekick", "Newtons", "FORCE", "", Speedometer_Widget.STYLE_SPEEDOMETER, Speedometer_Widget.GOAL_TYPE_NONE);
     this.speedometer.set_level_and_num_ranges(0, this.MAX_FORCE);
   }
@@ -2531,7 +2652,7 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
     Rollkick.ONSET_THRESHOLD       = 10,
     Rollkick.DEBOUNCE_DURATION     = 0.3,
     $IC.onrollkick       = this.onrollkick.bind(this);
-    $IC. = this..bind(this);
+    $IC.onrolling        = this.onrolling.bind(this);
     this.clear();
   };
       
@@ -2569,7 +2690,7 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
   };
 
   /*--------------------------------------------------------*/
-  Forcekick.prototype. = function(e)
+  Forcekick.prototype.onrolling = function(e)
   {
     if(this.state == Forcekick.STATE_WAITING_TO_BECOME_CONNECTED)
       {
@@ -3079,6 +3200,10 @@ var carousel_pages = [
     <canvas id="myChart" width="400" height="400"></canvas>
     <label id="numberOfSessions">5</label>
     <input class="slider" id="slider1" value=5 type="range" min="1" max="31" step="1"  />
+    <div class="flex-box">
+        <input type="date" name="bday">
+        <button>Reset date</button>
+    </div>
 </div>
 
 <script>
@@ -3095,40 +3220,45 @@ var carousel_pages = [
 
     };
 
+
+    //TODO: STILL NEEDED
+    //Still need to do / figure out
+
+    //Connect real data to graph
+    //Allow for change of start date of graph
+    //Figure out colors for lines of datasets
+    //Figure out how many "graph" lines we allow
+    //Normalize the data so that we can see the graphs together when the data points are WAY different
+    //Tie the tool-tips in to the actual data so that they show the real numbers
+    //Find a way to collect real data based on a date and number of sessions
+
+    //MINOR
+    //Default sessions number
+    //Max sessions number
+
+    //Allow for selection of games
+    //Allow for selection of stats for given games
+
+    //Set up saving of data
+
+    //Set up downloading of data when online but not viewing stats page
+
+
     /*--------------------------------------------------------*/
     MyStatsPage.prototype.page_load = function() {
 
-
-
-
-        //TODO do we want circle points or something else?
-        //TODO we can add and remove data with:
-//        chart.data.labels.push(label);
-//        chart.data.datasets.forEach((dataset) => {
-//            dataset.data.push(data);
-//    });
-//        chart.update();
-        //TODO and
-//        chart.data.labels.pop();
-//        chart.data.datasets.forEach((dataset) => {
-//            dataset.data.pop();
-//    });
-//        chart.update();
-
-
-        console.log("test")
         var ctx = document.getElementById("myChart");
-
 
         //TODO put this in a global space so it's only called once on load of app
         //TODO need to figure out the correct size of the tap area
-        Chart.defaults.global.elements.point.hitRadius = 10; //needed to make it so the hit area on phone works
-        Chart.defaults.global.animation.duration = 0;
+        Chart.defaults.global.elements.point.hitRadius = 20; //needed to make it so the hit area on phone works
+        Chart.defaults.global.animation.duration = 0; //Needed so that it doesn't look wonky when changing data set
 
         var labels = ["Jan 1", "Jan 2", "Jan 3", "Jan 4", "Jan 5", "Jan 6", "Jan 7", "Jan 8", "Jan 9", "Jan 10", "Jan 11", "Jan 12", "Jan 13", "Jan 14", "Jan 15", "Jan 16", "Jan 17", "Jan 18", "Jan 19", "Jan 20", "Jan 21", "Jan 22", "Jan 23", "Jan 24", "Jan 25", "Jan 26", "Jan 27", "Jan 28", "Jan 29", "Jan 30", "Jan 31"];
         var dataSet1 = [12, 19, 3, 5, 2, 3, 7, 4, 8, 3, 5, 2, 3, 7, 4, 8, 2, 11, 20, 3, 7, 2, 11, 20, 12, 19, 4, 8, 2, 11, 2];
         var dataSet2 = [5, 2, 14, 9, 7, 13, 1, 1, 4, 5, 6, 13, 12, 19, 3, 5, 2, 3, 7, 4, 8, 2, 11, 20, 5, 2, 14, 9, 7, 13, 1];
 
+        //TODO do we want circle points or something else?
         var myLineChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -3158,7 +3288,7 @@ var carousel_pages = [
                         display: true,
                         scaleLabel: {
                             display: true, //Needed so that when there are many labels, we only get those that fit
-                            labelString: '' //We don't want one because it's obvious
+                            labelString: '' //We don't want one because it's obvious, and makes the whole view look odd
                         }
                     }],
                     yAxes: [{
@@ -3169,9 +3299,25 @@ var carousel_pages = [
                     }]
                 },
                 tooltips: {
+
+                    callbacks: {
+
+                        //TODO this needs to change so that we get the data, and then show the correct item.
+                        label: function(tooltipItem, data) { //This is an attempt to make the tooltip text different so that we can normalize the data
+                            var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += Math.round(tooltipItem.yLabel * 100) / 100;
+                            return label + "custom text here";
+                        }
+                    },
+
                     mode: 'point',
                     intersect: false,
                     animationDuration: 0 // needed to not take forever for tooltip to load
+
                 },
                 events: ['click'] //Needed for not hover
             }
@@ -3278,7 +3424,7 @@ var carousel_pages = [
     Rollkick.DEBOUNCE_DURATION     = 1.0,
     this.speedometer.resume_updating();
     $IC.onrollkick       = this.onrollkick.bind(this);
-    $IC. = this..bind(this);
+    $IC.onrolling        = this.onrolling.bind(this);
     this.clear();
   };
       
@@ -3366,7 +3512,7 @@ var carousel_pages = [
   };
 
   /*--------------------------------------------------------*/
-  Passkick.prototype. = function(e)
+  Passkick.prototype.onrolling = function(e)
   {
     if(this.state == Passkick.STATE_WAITING_TO_BECOME_CONNECTED)
       {
@@ -3800,6 +3946,64 @@ var carousel_pages = [
         return extension && (capMusicFolder || lapMusicFolder);
     };
 
+</script>
+<div id="page-recover-ball-password" class="page">
+  <div class="terms_of_service_text">
+    <h3>
+      You must follow the actions below to put the ball into recovery mode. Pay attention to timing.
+    </h3>
+    <p>
+      <br><br>
+      Place the ball on the charger and make sure it is charging (blue light is on).
+      <br><br>
+      Timing (mm:ss)
+      <br><br>
+      <b>00:00</b>&emsp;WITHOUT MOVING THE BALL, disconnect the USB cable from the charger.<br>
+      <b>00:30</b>&emsp;Quickly flip the ball upside down (180 degrees) and place back on charger.<br>
+      <b>01:00</b>&emsp;Flip the ball  again upside down, so it is now back in initial position.<br>
+      <br><br>
+      Wait 10-30 seconds ,
+      <br><br>
+      On your phone or computer refresh your WiFi list. You should see IC_RECOVERY in the list and you can connect with password:   ic123456
+    </p>
+
+  </div>
+  <br><br>
+  <div class="server-form"><button class="input-field button" onclick="navigation_go_back();">OK</button></div>
+</div>
+
+<script>
+   GLOBAL_JS_PAGE_OBJECTS["recover-ball-password"] = {id:"page-recover-ball-password", obj:new RevoverBallPassword()};
+   
+  /*--------------------------------------------------------*/
+  function RevoverBallPassword()
+  {
+  
+  }
+
+  /*--------------------------------------------------------*/
+  RevoverBallPassword.prototype.page_will_unload = function()
+  {
+
+  };
+
+  /*--------------------------------------------------------*/
+  RevoverBallPassword.prototype.page_load = function()
+  {
+
+  };
+      
+  /*--------------------------------------------------------*/
+  RevoverBallPassword.prototype.page_did_unload = function()
+  {
+  
+  };
+
+  /*--------------------------------------------------------*/
+  RevoverBallPassword.prototype.page_clear = function()
+  {
+  
+  };
 </script>
 <div id="page-reset-password" class="page">
   <form class="server-form" id="reset_password_form" onsubmit="return false">
@@ -4342,7 +4546,7 @@ var carousel_pages = [
 /FOR_BUILD_ONLY-->
 <script>
 
-var $VERSION = "06 Mar 2018 4:15:07";
+var $VERSION = "08 Mar 2018 1:47:04";
 
 /**** ALL JS ****/
 var $ROUTINES = {"Toe Taps":{"type":"rollkick","video":"videos\/toe_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Ball Taps Clock":{"type":"rollkick","video":"videos\/ball_taps_clock.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Brazilian Sole Flicks":{"type":"rollkick","video":"videos\/brazilian_sole_flicks.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":20,"min_duration":0.3,"speedometer_num_text":"FLICKS","speedometer_level_text":"flicks","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Forward Backward Rolls":{"type":"rollkick","video":"videos\/forward_backward_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals"},"Left Right Front Rolls":{"type":"rollkick","video":"videos\/left_right_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals"},"Pull Back Taps":{"type":"rollkick","video":"videos\/pull_back_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":4,"mode":0,"menu_parent":"Fundamentals"},"Irish Jig":{"type":"rollkick","video":"videos\/irish_jig.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Single Leg V Taps":{"type":"rollkick","video":"videos\/single_leg_v_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"Vs","speedometer_level_text":"vs","divide_by":4,"mode":0,"menu_parent":"Fundamentals"},"Wall Kicks":{"type":"rollkick","video":"videos\/wall_kicks.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.3,"speedometer_num_text":"KICKS","speedometer_level_text":"kicks","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Penalty Kicks":{"type":"flightkick","video":"videos\/penalty_kicks.mp4","menu_parent":"Kicks","flightkick_mode":"freekick"},"In Out Dribbling":{"type":"cones","video":"videos\/in_out_dribbling.mp4","menu_parent":"Dribbling"},"Virtual Coach":{"type":"freeplay","video":"videos\/free_play.mp4","menu_parent":"Dribbling"},"2-Person Passes":{"type":"rollkick","video":"videos\/2_person_passes.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.5,"speedometer_num_text":"PASSES","speedometer_level_text":"passes","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Funny Sounds":{"type":"funny sounds","menu_parent":"Dribbling"},"Passkick":{"type":"passkick","menu_parent":"Kicks"},"Topspin":{"type":"topspin","menu_parent":"Kicks"},"Force Kick":{"type":"forcekick","menu_parent":"Kicks"}};
@@ -8646,6 +8850,19 @@ function server_validate_user_is_online_and_notify()
 }
 
 /*--------------------------------------------------------------------*/
+function server_validate_ascii_alpanum_and_notify(str, str_name)
+{
+  result = /[A-Za-z0-9]+/.test(str);
+  if(!result)
+    {
+      server_generic_notify(str_name + " must contain only letters and numbers");
+      return result;
+    }
+  
+  return true;
+}
+
+/*--------------------------------------------------------------------*/
 function server_validate_letters_spaces_only_and_notify(str, str_name)
 {
   var result = (str.length < 50);
@@ -8768,7 +8985,18 @@ function server_inactivate_button(button, timeout)
   button.setAttribute("data-active-html", html);
   button.innerHTML = '<img class="spinny_ball" src="images/default_profile_image.png" alt="loading">';
   if(timeout > 0)
-    setTimeout(server_reactivate_button.bind(window, button), timeout);
+    setTimeout(server_reactivate_button_on_timeout.bind(window, button), timeout);
+}
+
+/*--------------------------------------------------------------------*/
+function server_reactivate_button_on_timeout(button)
+{
+  var html = button.getAttribute("data-active-html", html);
+  if(html)
+    {
+      server_reactivate_button(button);
+      server_generic_notify("Your request timed out");
+    }
 }
 
 /*--------------------------------------------------------------------*/
