@@ -1,0 +1,10 @@
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea/
+build/platforms/
+build/node_modules/
+build/package-lock.json
+build/package.json
+/_tests/
