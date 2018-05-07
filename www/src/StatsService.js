@@ -320,9 +320,38 @@ StatsService._createDisplayNames = function(gameType) {
 
     var names = [];
 
-    if (StatsService._isGameTypeFundamental(gameType)) {
+    //Fundamentals are broken out here because they display different things.
+    if (gameType === GameTypes.GAME_TYPE_TOE_TAPS) {
         //Fundamentals
-        names.push("Kicks");
+        names.push("Taps");
+        names.push("Duration");
+    } else if (gameType === GameTypes.GAME_TYPE_BALL_TAPS_CLOCK) {
+        //Fundamentals
+        names.push("Taps");
+        names.push("Duration");
+    } else if (gameType === GameTypes.GAME_TYPE_BRAZILIAN_SOLE_FLICKS) {
+        //Fundamentals
+        names.push("Flicks");
+        names.push("Duration");
+    } else if (gameType === GameTypes.GAME_TYPE_FORWARD_BACKWARD_ROLLS) {
+        //Fundamentals
+        names.push("Touches");
+        names.push("Duration");
+    } else if (gameType === GameTypes.GAME_TYPE_LEFT_RIGHT_FRONT_ROLLS) {
+        //Fundamentals
+        names.push("Touches");
+        names.push("Duration");
+    } else if (gameType === GameTypes.GAME_TYPE_PULL_BACK_TAPS_ROLLS) {
+        //Fundamentals
+        names.push("Taps");
+        names.push("Duration");
+    } else if (gameType === GameTypes.GAME_TYPE_IRISH_JIG) {
+        //Fundamentals
+        names.push("Taps");
+        names.push("Duration");
+    } else if (gameType === GameTypes.GAME_TYPE_SINGLE_LEG_V_TAPS) {
+        //Fundamentals
+        names.push("Vs");
         names.push("Duration");
     } else if (gameType === GameTypes.GAME_TYPE_WALL_KICKS) {
         //wall kicks
@@ -353,6 +382,21 @@ StatsService._createDisplayNames = function(gameType) {
     }
 
     return names;
+};
+
+StatsService.convertDurationToDisplayFormat = function(duration) {
+    var hours = Math.floor(duration / (60 * 24));
+    var remainingSeconds = duration % (60 * 24);
+    var minutes = Math.floor(remainingSeconds / 60);
+    var seconds = Math.floor(remainingSeconds % 60);
+
+    var str = "";
+    if (hours > 0) {
+        str += hours + "h ";
+    }
+    str += minutes + "m ";
+    str += seconds + "s";
+    return str;
 };
 
 StatsService._createDisplayStat = function(currentGameItem, currentDate, gameType) {
