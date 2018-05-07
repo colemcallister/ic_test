@@ -13,7 +13,7 @@ UserService.doLoginAsync = function(email, password) {
 
     return NetworkService.doHttpCallAsync("POST", NetworkService.SERVER_URL + "auth/login", params)
         .then(function(response) {
-            if (response && response.hasOwnProperty("status") && response.status) {
+            if (response && response.hasOwnProperty("success") && response.success) {
                 UserService._saveLoginData(response.token, response.nickname, response.username, response.profile_image);
             } else {
                 return Promise.reject(response);
