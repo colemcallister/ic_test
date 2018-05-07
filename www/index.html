@@ -3411,7 +3411,7 @@ var carousel_pages = [
         <h2>No stats</h2>
         <span>Stats are only available for users that are logged in. Please login to create and view stats.</span>
         <form class="server-form">
-            <button style="margin-top: 40px" class="button" onclick='my_stats_page.loginClicked()'>Login</button>
+            <a style="margin-top: 40px" class="button" href="#/login">Login</a>
         </form>
     </div>
 
@@ -3446,10 +3446,6 @@ var carousel_pages = [
             document.getElementById("main-stats-page").style.display = "none";
             document.getElementById("no-stats-page").style.display = null;
         }
-    };
-
-    MyStatsPage.prototype.loginClicked = function() {
-        navigate_to("#/login");
     };
 
     MyStatsPage.prototype._loadMainStatsPage = function() {
@@ -5007,7 +5003,7 @@ var carousel_pages = [
 
 <script>
 
-var $VERSION = "07 May 2018 4:44:13";
+var $VERSION = "07 May 2018 4:49:09";
 
 /**** ALL JS ****/
 var $ROUTINES = {"Toe Taps":{"type":"rollkick","video":"videos\/toe_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 5 taps  in 10 seconds","type":"x_in_y","count":5,"duration":10},{"name":"Do 20 taps  in 1 minute (20t\/m)","type":"x_in_y","count":20,"duration":60},{"name":"Do 30 taps  in 1 minute (30t\/m)","type":"x_in_y","count":30,"duration":60},{"name":"Do 40 taps  in 1 minute (40t\/m)","type":"x_in_y","count":40,"duration":60},{"name":"Do 100 taps  in 2 minutes (50t\/m)","type":"x_in_y","count":100,"duration":120},{"name":"Do 120 taps  in 2 minutes (60t\/m)","type":"x_in_y","count":120,"duration":120},{"name":"Do 240 taps  in 3 minutes (80t\/m)","type":"x_in_y","count":240,"duration":180}]},"Ball Taps Clock":{"type":"rollkick","video":"videos\/ball_taps_clock.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Brazilian Sole Flicks":{"type":"rollkick","video":"videos\/brazilian_sole_flicks.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":20,"min_duration":0.3,"speedometer_num_text":"FLICKS","speedometer_level_text":"flicks","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Forward Backward Rolls":{"type":"rollkick","video":"videos\/forward_backward_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals"},"Left Right Front Rolls":{"type":"rollkick","video":"videos\/left_right_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals"},"Pull Back Taps":{"type":"rollkick","video":"videos\/pull_back_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":4,"mode":0,"menu_parent":"Fundamentals"},"Irish Jig":{"type":"rollkick","video":"videos\/irish_jig.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals"},"Single Leg V Taps":{"type":"rollkick","video":"videos\/single_leg_v_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"Vs","speedometer_level_text":"vs","divide_by":4,"mode":0,"menu_parent":"Fundamentals"},"Wall Kicks":{"type":"rollkick","video":"videos\/wall_kicks.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.3,"speedometer_num_text":"KICKS","speedometer_level_text":"kicks","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Penalty Kicks":{"type":"flightkick","video":"videos\/penalty_kicks.mp4","menu_parent":"Kicks","flightkick_mode":"freekick"},"In Out Dribbling":{"type":"cones","video":"videos\/in_out_dribbling.mp4","menu_parent":"Dribbling"},"Virtual Coach":{"type":"freeplay","video":"videos\/free_play.mp4","menu_parent":"Dribbling"},"2-Person Passes":{"type":"rollkick","video":"videos\/2_person_passes.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.5,"speedometer_num_text":"PASSES","speedometer_level_text":"passes","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Funny Sounds":{"type":"funny sounds","menu_parent":"Dribbling"},"Passkick":{"type":"passkick","menu_parent":"Kicks"},"Topspin":{"type":"topspin","menu_parent":"Kicks"},"Force Kick":{"type":"forcekick","menu_parent":"Kicks"}};
