@@ -20,13 +20,17 @@ UserService.doLoginAsync = function(email, password) {
             }
         })
         .then(function() {
-            return UserService.fetchUserDetailsAsync();
-        })
-        .then(function(response) {
-            var userDetails = response["User Details"];
-            UserService._saveUserDetailsData(userDetails);
+            return UserService.fetchAndSaveUserDetailsAsync();
         });
 
+};
+
+UserService.fetchAndSaveUserDetailsAsync = function() {
+    return UserService.fetchUserDetailsAsync().then(function(response) {
+        var userDetails = response["User Details"];
+        UserService._saveUserDetailsData(userDetails);
+        return userDetails;
+    });
 };
 
 UserService.fetchUserDetailsAsync = function() {

@@ -60,7 +60,7 @@ GamesService.getGameTypeFromGameName = function(gameName) {
         return GameTypes.GAME_TYPE_FORWARD_BACKWARD_ROLLS;
     } else if (gameName === "Left Right Front Rolls") {
         return GameTypes.GAME_TYPE_LEFT_RIGHT_FRONT_ROLLS;
-    } else if (gameName === "Pull Back Taps Rolls") {
+    } else if (gameName === "Pull Back Taps") {
         return GameTypes.GAME_TYPE_PULL_BACK_TAPS_ROLLS;
     } else if (gameName === "Irish Jig") {
         return GameTypes.GAME_TYPE_IRISH_JIG;

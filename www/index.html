@@ -1825,7 +1825,13 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
             <li id="hamburger-menu-item-log-in"><a href="#/login">Log In</a></li>
           </ul>
         </li>
-        <li class="my-stats-icon"><a href="#/my-stats">My Stats</a></li>
+        <li class="my-stats-icon dropdown-item"><a href="#">Stats</a>
+              <ul>
+                  <li class=""><a href="#/my-stats">My Stats</a></li>
+                  <li class=""><a href="#/stats-status">Stats Status</a></li>
+              </ul>
+        </li>
+
       </ul>
     </div>
   </div>
@@ -2330,7 +2336,7 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
     <input class="input-field" type="text" placeholder="Postal Code" name="postal_code">
     <input class="input-field" type="text" placeholder="Phone No" name="phone_no">
     
-    <label for="upload" class="input-field button" style="line-height:40px">Choose your avatar</label>
+    <label for="upload" class="input-field button" style="line-height:40px">Select avatar</label>
     <input id="upload" name="profile_image" onchange="edit_profile.get_resized_base_64_image(this)" class="input-field button" style="display:none" type="file" accept="image/*" capture="camera">
     <input class="input-field button" type="hidden"  id="uploaded_image" name="uploaded_image">
     
@@ -2368,7 +2374,7 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
       this.googleAnalyticsService.pageLoaded(GoogleAnalyticsService.PAGE_NAME_EDIT_PROFILE);
 
     if(server_validate_user_is_logged_in_and_notify())
-    this.get_account_info(window.event, "edit_profile_form");
+    this.get_account_info(window.event);
   };
       
   /*--------------------------------------------------------*/
@@ -2385,32 +2391,30 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
   };
     
   /*--------------------------------------------------------*/
-  EditProfile.prototype.get_account_info = function(e, form_id)
+  EditProfile.prototype.get_account_info = function(e)
   {
-    e = e || window.event;
-    if(e) e.preventDefault();
+      var self = this;
+      e = e || window.event;
+      if (e) {
+          e.preventDefault();
+      }
 
-    var params = 
-    {
-      token: server_get_login_token(),
-      form_id: form_id,   //the server dosen't need to know this but it is an easy way of passing it to the callback.
-    };
-
-    if(server_user_is_online())
-      server_send_request("auth/user-details", params, this.get_account_info_callback.bind(this));
-
-    else
-      {
-        var saved = JSON.parse( localStorage.getItem(EDIT_PROFILE_LOCAL_STORAGE_NAME));
-        if(saved) this.get_account_info_callback(saved.response, saved.params);
+      if(server_user_is_online()) {
+          UserService.fetchAndSaveUserDetailsAsync().then(function(userDetails) {
+              self.get_account_info_callback(userDetails);
+          });
+      } else {
+          var saved = JSON.parse( localStorage.getItem(EDIT_PROFILE_LOCAL_STORAGE_NAME));
+          if (saved) {
+              self.get_account_info_callback(saved);
+          }
       }
   };
 
   /*--------------------------------------------------------*/
-  EditProfile.prototype.get_account_info_callback = function(response, params)
+  EditProfile.prototype.get_account_info_callback = function(details)
   {
-    var form = document.getElementById(params.form_id);
-    var details = response["User Details"];
+    var form = document.getElementById("edit_profile_form");
     
     /*focus is workaround for Safari bug*/
     form.nickname.value = (details.nickname) ? details.nickname.trim() : '';
@@ -2430,8 +2434,6 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
     form.full_name.value = (details.full_name) ? details.full_name.trim() : '';
     form.full_name.focus();
     form.full_name.blur();
-    
-    localStorage.setItem(EDIT_PROFILE_LOCAL_STORAGE_NAME, JSON.stringify({"response":response, "params":params}));
   };
 
   /*--------------------------------------------------------*/
@@ -2568,9 +2570,8 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
   };
   
   /*--------------------------------------------------------------------*/
-  EditProfile.prototype.update_account_callback = function(response, params)
-  {
-    edit_profile.get_account_info(window.event, "edit_profile_form");
+  EditProfile.prototype.update_account_callback = function(response, params) {
+        edit_profile.get_account_info(window.event);
   }
 </script>
 <div id="routine-forcekick-game" class="page">
@@ -3371,11 +3372,11 @@ var carousel_pages = [
                   self.login_callback();
               })
               //Do this in the background
-              .then(function() {
-                  return StatsService.pushLatestGameStatsAsync();
-              })
-              .then(function() {
-                  return StatsService.fetchLatestGameStatsAsync();
+              .then( function() {
+                  //We want to do both of fetchLatestGameStatsAsync even if pushLatestGameStatsAsync but we also want them one after the other
+                  return StatsService.pushLatestGameStatsAsync().finally(function() {
+                      return StatsService.fetchLatestGameStatsAsync();
+                  });
               })
               .catch(function(response) {
                   if (response && response.message) {
@@ -3468,15 +3469,26 @@ var carousel_pages = [
         var promises = [];
 
         if (!StatsService.hasFetchedWithinLastHour()) {
-            promises.push(StatsService.fetchLatestGameStatsAsync());
+            promises.push(StatsService.pushLatestGameStatsAsync());
             //TODO show loading
         }
         if (!StatsService.hasPushedWithinLastHour()) {
-            promises.push(StatsService.pushLatestGameStatsAsync());
+            //It needs to be in order, but still happen if the other does not.
+            if (promises.length > 0) {
+                promises[0] = promises[0].finally(function() {
+                    return StatsService.fetchLatestGameStatsAsync();
+                })
+            } else {
+                promises.push(StatsService.fetchLatestGameStatsAsync());
+            }
             //TODO show loading
         }
 
         Promise.all(promises)
+            .catch(function() {
+                //Error pushing or fetching
+                //TODO should we care, or move on?
+            })
             .finally(function() {
                 //TODO remove loading
 
@@ -4719,7 +4731,145 @@ var carousel_pages = [
     navigate_to('#/login');
   }
 </script>
-<div id="page-terms-of-service" class="page">
+<div id="page-stats-status" class="page">
+    <div id="main-stats-status-page">
+        <div class="flex-vertical">
+            <div class="flex-horizontal">
+                <label style="margin-right: 16px">Last sync: </label>
+                <div id="last_sync_date">Never</div>
+            </div>
+            <div class="flex-horizontal">
+                <label style="margin-right: 16px">Number of un-synced sessions: </label>
+                <div id="number_of_unsynced_sessions">None</div>
+            </div>
+        </div>
+        <form class="server-form">
+            <a style="margin-top: 40px" class="button" onclick="stats_status_page.syncPressed()">Sync</a>
+        </form>
+        <div id="sync-progress">Syncing....</div>
+
+    </div>
+    <div id="no-stats-status-page" style="display:none">
+        <h2>No stats</h2>
+        <span>Stats are only available for users that are logged in. Please login view the status of your stats.</span>
+        <form class="server-form">
+            <a style="margin-top: 40px" class="button" href="#/login">Login</a>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    var stats_status_page = new StatsStatusPage();
+    stats_status_page.isSyncing = false;
+    GLOBAL_JS_PAGE_OBJECTS["stats-status"] = {id:"page-stats-status", obj:stats_status_page};
+
+    /*--------------------------------------------------------*/
+    function StatsStatusPage() {
+
+    }
+
+    /*--------------------------------------------------------*/
+    StatsStatusPage.prototype.page_will_unload = function() {
+
+    };
+
+    /*--------------------------------------------------------*/
+    StatsStatusPage.prototype.page_load = function() {
+        ViewUtil.scrollToTopOfPage();
+        if (!this.googleAnalyticsService) {
+            this.googleAnalyticsService = new GoogleAnalyticsService();
+        }
+        this.googleAnalyticsService.pageLoaded(GoogleAnalyticsService.PAGE_NAME_STATS_STATUS);
+
+        if (NetworkService.isUserLoggedIn()) {
+            document.getElementById("no-stats-status-page").style.display = "none";
+            document.getElementById("main-stats-status-page").style.display = null;
+            stats_status_page._updateSyncingDisplay();
+            stats_status_page._loadSyncData();
+        } else {
+            document.getElementById("main-stats-status-page").style.display = "none";
+            document.getElementById("no-stats-status-page").style.display = null;
+        }
+    };
+
+    /*--------------------------------------------------------*/
+    StatsStatusPage.prototype.page_did_unload = function() {
+
+    };
+
+    /*--------------------------------------------------------*/
+    StatsStatusPage.prototype.syncPressed = function() {
+        var self = this;
+        if (!self.isSyncing) {
+            var successfulSync = true;
+            if (server_user_is_online()) {
+                self.isSyncing = true;
+                self._updateSyncingDisplay();
+                StatsService.pushLatestGameStatsAsync()
+                    .catch(function() {
+                        $.notify("Failure pushing data to server.", {style:"ic"});
+                        successfulSync = false;
+                    })
+                    .then(function() {
+                        return StatsService.fetchLatestGameStatsAsync();
+                    })
+                    .catch(function() {
+                        $.notify("Failure fetching data from server.", {style:"ic"});
+                        successfulSync = false;
+                    })
+                    .then(function() {
+                        if (successfulSync) {
+                            $.notify("Sync successful!", {style:"ic"});
+                        } else {
+                            $.notify("Sync failed. Please try again later.", {style:"ic"});
+                        }
+                    })
+                    .finally(function() {
+                        self.isSyncing = false;
+                        stats_status_page._loadSyncData();
+                        self._updateSyncingDisplay();
+                    })
+            } else {
+                $.notify("You are not connected to the internet. Please connect to the internet to sync.", {style:"ic"});
+            }
+        }
+
+    };
+
+    /*--------------------------------------------------------*/
+    StatsStatusPage.prototype._updateSyncingDisplay = function() {
+        if (this.isSyncing) {
+            document.getElementById("sync-progress").style.display = null;
+        } else {
+            document.getElementById("sync-progress").style.display = "none";
+        }
+    };
+
+    /*--------------------------------------------------------*/
+    StatsStatusPage.prototype._loadSyncData = function() {
+        var unsyncedSessions = StatsService.getNumberOfTempStatsSessions();
+        document.getElementById("number_of_unsynced_sessions").innerHTML = unsyncedSessions;
+
+        var lastFetchTime = StatsService.getLastFetchTime();
+        var lastPushTime = StatsService.getLastPushTime();
+
+        if (lastPushTime > lastFetchTime) {
+            stats_status_page._showSyncTime(lastFetchTime);
+        } else {
+            stats_status_page._showSyncTime(lastPushTime);
+        }
+    };
+
+    StatsStatusPage.prototype._showSyncTime = function(syncTime) {
+        if (!syncTime) {
+            document.getElementById("last_sync_date").innerHTML = "Never";
+        } else {
+            document.getElementById("last_sync_date").innerHTML = moment(syncTime).format('MMMM Do YYYY, h:mm a');
+        }
+    };
+
+</script><div id="page-terms-of-service" class="page">
 <div class="terms_of_service_text">
 <h2>
 	Terms and Conditions of Use
@@ -5028,6 +5178,8 @@ var carousel_pages = [
 <script src="src/data/entity/games/PenaltyKicksGameStat.js"></script>
 <script src="src/data/entity/games/TwoPersonPassesGameStat.js"></script>
 <script src="src/data/entity/games/PassKickGameStat.js"></script>
+<script src="src/data/entity/games/TopspinGameStat.js"></script>
+<script src="src/data/entity/games/ForceKickGameStat.js"></script>
 <script src="src/data/entity/DisplayGameStat.js"></script>
 
 <!--  UTILS    -->
@@ -5036,7 +5188,7 @@ var carousel_pages = [
 
 <script>
 
-var $VERSION = "16 May 2018 2:17:21";
+var $VERSION = "19 May 2018 2:45:32";
 
 /**** ALL JS ****/
 var $ROUTINES = {"Toe Taps":{"type":"rollkick","video":"videos\/toe_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 140 taps  in 1 minute","type":"x_in_y","count":140,"duration":60},{"name":"Do 320 taps  in 3 minutes","type":"x_in_y","count":320,"duration":180},{"name":"Do 550 taps  in 5 minutes","type":"x_in_y","count":550,"duration":300}]},"Ball Taps Clock":{"type":"rollkick","video":"videos\/ball_taps_clock.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 130 taps  in 1 minute","type":"x_in_y","count":130,"duration":60},{"name":"Do 330 taps  in 3 minutes","type":"x_in_y","count":330,"duration":180},{"name":"Do 460 taps  in 5 minutes","type":"x_in_y","count":460,"duration":300}]},"Brazilian Sole Flicks":{"type":"rollkick","video":"videos\/brazilian_sole_flicks.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":20,"min_duration":0.3,"speedometer_num_text":"FLICKS","speedometer_level_text":"flicks","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 110 taps  in 1 minute","type":"x_in_y","count":110,"duration":60},{"name":"Do 250 taps  in 3 minutes","type":"x_in_y","count":250,"duration":180},{"name":"Do 430 taps  in 5 minutes","type":"x_in_y","count":430,"duration":300}]},"Forward Backward Rolls":{"type":"rollkick","video":"videos\/forward_backward_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 130 taps  in 3 minutes","type":"x_in_y","count":130,"duration":180},{"name":"Do 240 taps  in 5 minutes","type":"x_in_y","count":240,"duration":300}]},"Left Right Front Rolls":{"type":"rollkick","video":"videos\/left_right_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 90 taps  in 3 minutes","type":"x_in_y","count":90,"duration":180},{"name":"Do 170 taps  in 5 minutes","type":"x_in_y","count":170,"duration":300}]},"Pull Back Taps":{"type":"rollkick","video":"videos\/pull_back_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":4,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 15 taps  in 1 minute","type":"x_in_y","count":15,"duration":60},{"name":"Do 40 taps  in 3 minutes","type":"x_in_y","count":40,"duration":180},{"name":"Do 90 taps  in 5 minutes","type":"x_in_y","count":90,"duration":300}]},"Irish Jig":{"type":"rollkick","video":"videos\/irish_jig.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 110 taps  in 1 minute","type":"x_in_y","count":110,"duration":60},{"name":"Do 215 taps  in 3 minutes","type":"x_in_y","count":220,"duration":180},{"name":"Do 395 taps  in 5 minutes","type":"x_in_y","count":400,"duration":300}]},"Single Leg V Taps":{"type":"rollkick","video":"videos\/single_leg_v_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"Vs","speedometer_level_text":"vs","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 10 taps  in 1 minute","type":"x_in_y","count":10,"duration":60},{"name":"Do 25 taps  in 3 minutes","type":"x_in_y","count":25,"duration":180},{"name":"Do 50 taps  in 5 minutes","type":"x_in_y","count":50,"duration":300}]},"Wall Kicks":{"type":"rollkick","video":"videos\/wall_kicks.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.3,"speedometer_num_text":"KICKS","speedometer_level_text":"kicks","divide_by":1,"mode":1,"menu_parent":"Kicks","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 110 taps  in 3 minutes","type":"x_in_y","count":110,"duration":180},{"name":"Do 160 taps  in 5 minutes","type":"x_in_y","count":160,"duration":300}]},"Penalty Kicks":{"type":"flightkick","video":"videos\/penalty_kicks.mp4","menu_parent":"Kicks","flightkick_mode":"freekick"},"In Out Dribbling":{"type":"cones","video":"videos\/in_out_dribbling.mp4","menu_parent":"Dribbling"},"Virtual Coach":{"type":"freeplay","video":"videos\/free_play.mp4","menu_parent":"Dribbling"},"2-Person Passes":{"type":"rollkick","video":"videos\/2_person_passes.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.5,"speedometer_num_text":"PASSES","speedometer_level_text":"passes","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Funny Sounds":{"type":"funny sounds","menu_parent":"Dribbling"},"Passkick":{"type":"passkick","menu_parent":"Kicks"},"Topspin":{"type":"topspin","menu_parent":"Kicks"},"Force Kick":{"type":"forcekick","menu_parent":"Kicks"}};
@@ -9546,6 +9698,11 @@ $(window).one('load',function(){
 	$('#page-holder').fadeIn(1000);
 	var googleAnalytics = new GoogleAnalyticsService();
 	googleAnalytics.init();
+
+	var numberUnsyncedSessions = StatsService.getNumberOfTempStatsSessions();
+	if (numberUnsyncedSessions > 0) {
+        $.notify("You have unsynced sessions. Go to the Stats Status page to sync.", {style:"ic"});
+    }
 	IC_APP.run(carousel.has_been_fully_viewed() ? (NetworkService.isUserLoggedIn() ? '#/games' : '#/login' ) : '#/setup-guide');
 });
 

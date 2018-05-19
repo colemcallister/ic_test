@@ -4,11 +4,22 @@ function StatsService() {
 StatsService.LAST_FETCH_TIME = "last fetch time";
 StatsService.LAST_PUSH_TIME = "last push time";
 
+StatsService.getLastFetchTime = function() {
+    var lastFetchString = localStorage.getItem(StatsService.LAST_FETCH_TIME);
+    var lastFetchTime = Number.parseInt(lastFetchString ? lastFetchString : "0");
+    return lastFetchTime;
+};
+
+StatsService.getLastPushTime = function() {
+    var lastPushString = localStorage.getItem(StatsService.LAST_PUSH_TIME);
+    var lastPushTime = Number.parseInt(lastPushString ? lastPushString : "0");
+    return lastPushTime;
+};
+
 StatsService.hasFetchedWithinLastHour = function() {
     var now = (new Date()).getTime();
 
-    var lastFetchString = localStorage.getItem(StatsService.LAST_FETCH_TIME);
-    var lastFetchTime = Number.parseInt(lastFetchString ? lastFetchString : "0");
+    var lastFetchTime = StatsService.getLastFetchTime();
 
     var oneHourInMillies = 60 * 60 * 1000;
     if ((lastFetchTime + oneHourInMillies) > now) {
@@ -20,8 +31,7 @@ StatsService.hasFetchedWithinLastHour = function() {
 StatsService.hasPushedWithinLastHour = function() {
     var now = (new Date()).getTime();
 
-    var lastPushString = localStorage.getItem(StatsService.LAST_PUSH_TIME);
-    var lastPushTime = Number.parseInt(lastPushString ? lastPushString : "0");
+    var lastPushTime = StatsService.getLastPushTime()
 
     var oneHourInMillies = 60 * 60 * 1000;
     if ((lastPushTime + oneHourInMillies) > now) {
@@ -44,29 +54,30 @@ StatsService.fetchLatestGameStatsAsync = function() {
         return Promise.reject();
     }
 
-    var gamePromises = [];
+    var categoryPromises = [];
 
     var lastFetchTime = localStorage.getItem(StatsService.LAST_FETCH_TIME);
     var now = new Date();
 
-    var listOfGames = GamesService.getGames();
-    for (var i = 0; i < listOfGames.length; i++) {
-        var game = listOfGames[i];
-
-        //fetch all data between (lastFetchTime and NOW)
+    //TODO later we might deal with other game category ids, for now just these two.
+    var categoryIds = [1, 2];
+    for (var i = 0; i < categoryIds.length; i++) {
+        var categoryId = categoryIds[i];
         var params = {
-            category_id: game.getSessionId(),
+            category_id: categoryId,
             dateFrom: lastFetchTime ? StatsService._getServerDateString(new Date(parseInt(lastFetchTime))) : StatsService._getServerDateString(new Date(0)),
             dateTo: StatsService._getServerDateString(now)
         };
 
+        //fetch all data between (lastFetchTime and NOW)
         var promise = NetworkService.doAuthHttpCallAsync("POST", "session/list", params).then(function(response) {
-            StatsService._storeFetchedGameResponse(response);
+            StatsService._storeFetchedCategoryResponse(response);
         });
-        gamePromises.push(promise);
+        categoryPromises.push(promise);
     }
 
-    return Promise.all(gamePromises).then(function() {
+
+    return Promise.all(categoryPromises).then(function() {
         //store NOW as last fetch time
         //TODO is is possible that many succeeded and only a few failed. Should we keep track of which ones failed?
         localStorage.setItem(StatsService.LAST_FETCH_TIME, now.getTime().toString());
@@ -133,6 +144,19 @@ StatsService.pushLatestGameStatsAsync = function() {
         //Reject because we are not online.
         return Promise.reject();
     }
+};
+
+StatsService.getNumberOfTempStatsSessions = function() {
+    var count = 0;
+
+    var games = GamesService.getGames();
+
+    for (var i = 0; i < games.length; i++) {
+        var game = games[i];
+        var tempGameStats = StatsService._getGameStatsByGameType(game.getType(), true);
+        count += tempGameStats.length;
+    }
+    return count;
 };
 
 StatsService.getDisplayItemStatsOnDaysByType = function(gameType) {
@@ -230,8 +254,7 @@ StatsService._pushSingleGameStatToServerAsync = function(tempGameStat, gameType,
     return NetworkService.doAuthHttpCallAsync("POST", "session/create", params);
 };
 
-//TODO make this function smaller
-StatsService._storeFetchedGameResponse = function(response) {
+StatsService._storeFetchedCategoryResponse = function(response) {
     //TODO find a better way to do this, not based on a message, but maybe send down an empty array
     if (!Array.isArray(response)) {
         //There is nothing in the DB for us.
@@ -243,60 +266,63 @@ StatsService._storeFetchedGameResponse = function(response) {
             return;
         }
 
+        for (var i = 0; i < response.length; i++) {
+            var responseItem = response[i];
+            var routineId = responseItem.routine_id;
 
-        //this is aync, so we can't use the current game, so we need to use the response
-        var routineId = response[0].routine_id;
+            var gameType = GamesService.getGameTypeByRoutineId(routineId);
+            var gameStats = StatsService._getGameStatsByGameType(gameType, false);
+            //TODO creating a map each time seems like a horrible idea. It might be better to find out which ones need to be saved off against a singole map that has all ids, THEN save them off, not create a new map for each item.
+            var mapOfGameStatsIds = {};
+            for (var j = 0; j < gameStats.length; j++) {
+                var gameStat = gameStats[j];
+                mapOfGameStatsIds[gameStat.getId()] = gameStat.getId();
+            }
 
-        var gameType = GamesService.getGameTypeByRoutineId(routineId);
-        var gameStats = StatsService._getGameStatsByGameType(gameType, false);
-
-        var mapOfGameStatsIds = {};
-        for (var j = 0; j < gameStats.length; j++) {
-            var gameStat = gameStats[j];
-            mapOfGameStatsIds[gameStat.getId()] = gameStat.getId();
-        }
-
-        for (var j = 0; j < response.length; j++) {
-            var responseItem = response[j];
             if (!mapOfGameStatsIds[responseItem.id]) {
-                var metricsObj = {};
-
-                var metrics = responseItem.metrics;
-                for (var k = 0; k < metrics.length; k++) {
-                    var singleMetric = metrics[k];
-                    metricsObj[singleMetric.metric] = singleMetric.value;
-                }
-
-                var startDateFromPayload = responseItem.start_time;
-                var millis = StatsService._getDateFromServerDateString(startDateFromPayload);
-                var date = new Date(millis);
-
-                if (StatsService._isGameTypeFundamental(gameType)) {
-                    //Fundamentals
-                    StatsService.saveFundamentalStats(metricsObj.kicks, metricsObj.duration, gameType, date, false, responseItem.id);
-                } else if (gameType === GameTypes.GAME_TYPE_WALL_KICKS) {
-                    //wall kicks
-                    StatsService.saveWallKicksStats(metricsObj.kicks, metricsObj.duration, date, false, responseItem.id);
-                } else if (gameType === GameTypes.GAME_TYPE_PENALTY_KCIKS) {
-                    //penalty kicks
-                    StatsService.savePenaltyKicksStats(metricsObj.distance, metricsObj.height, metricsObj.speed, metricsObj.spin, date, false, responseItem.id);
-                } else if (gameType === GameTypes.GAME_TYPE_2_PERSON_PASSES) {
-                    // 2 person passes
-                    StatsService.save2PersonPassesStats(metricsObj.passes, metricsObj.duration, date, false, responseItem.id);
-                } else if (gameType === GameTypes.GAME_TYPE_PASSKICK) {
-                    //passkick
-                    StatsService.savePasskickStats(metricsObj.distance, date, false, responseItem.id);
-                } else if (gameType === GameTypes.GAME_TYPE_TOPSPIN) {
-                    //topspin
-                    StatsService.saveTopSpinStats(metricsObj.topspin, metricsObj.rightspin, date, false, responseItem.id);
-                } else if (gameType === GameTypes.GAME_TYPE_FORCE_KICK) {
-                    //force kick
-                    StatsService.saveForceKickStats(metricsObj.force, date, false, responseItem.id);
-                } else {
-                    //BAD, should never get here
-                }
+                StatsService._saveGameStatFromResponseItem(responseItem, routineId, gameType);
             }
         }
+    }
+};
+
+//TODO make this function smaller
+StatsService._saveGameStatFromResponseItem = function(responseItem, routineId, gameType) {
+    var metricsObj = {};
+
+    var metrics = responseItem.metrics;
+    for (var k = 0; k < metrics.length; k++) {
+        var singleMetric = metrics[k];
+        metricsObj[singleMetric.metric] = singleMetric.value;
+    }
+
+    var startDateFromPayload = responseItem.start_time;
+    var millis = StatsService._getDateFromServerDateString(startDateFromPayload);
+    var date = new Date(millis);
+
+    if (StatsService._isGameTypeFundamental(gameType)) {
+        //Fundamentals
+        StatsService.saveFundamentalStats(metricsObj.kicks, metricsObj.duration, gameType, date, false, responseItem.id);
+    } else if (gameType === GameTypes.GAME_TYPE_WALL_KICKS) {
+        //wall kicks
+        StatsService.saveWallKicksStats(metricsObj.kicks, metricsObj.duration, date, false, responseItem.id);
+    } else if (gameType === GameTypes.GAME_TYPE_PENALTY_KCIKS) {
+        //penalty kicks
+        StatsService.savePenaltyKicksStats(metricsObj.distance, metricsObj.height, metricsObj.speed, metricsObj.spin, date, false, responseItem.id);
+    } else if (gameType === GameTypes.GAME_TYPE_2_PERSON_PASSES) {
+        // 2 person passes
+        StatsService.save2PersonPassesStats(metricsObj.passes, metricsObj.duration, date, false, responseItem.id);
+    } else if (gameType === GameTypes.GAME_TYPE_PASSKICK) {
+        //passkick
+        StatsService.savePasskickStats(metricsObj.distance, date, false, responseItem.id);
+    } else if (gameType === GameTypes.GAME_TYPE_TOPSPIN) {
+        //topspin
+        StatsService.saveTopSpinStats(metricsObj.topspin, metricsObj.rightspin, date, false, responseItem.id);
+    } else if (gameType === GameTypes.GAME_TYPE_FORCE_KICK) {
+        //force kick
+        StatsService.saveForceKickStats(metricsObj.force, date, false, responseItem.id);
+    } else {
+        //BAD, should never get here
     }
 };
 
