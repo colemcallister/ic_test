@@ -1828,7 +1828,7 @@ Speedometer_Widget.prototype.interpolation_thread_run_loop_run = function()
         <li class="my-stats-icon dropdown-item"><a href="#">Stats</a>
               <ul>
                   <li class=""><a href="#/my-stats">My Stats</a></li>
-                  <li class=""><a href="#/stats-status">Stats Status</a></li>
+                  <li class=""><a href="#/sync-stats">Sync Stats</a></li>
               </ul>
         </li>
 
@@ -4731,8 +4731,8 @@ var carousel_pages = [
     navigate_to('#/login');
   }
 </script>
-<div id="page-stats-status" class="page">
-    <div id="main-stats-status-page">
+<div id="page-sync-stats" class="page">
+    <div id="main-sync-stats-page">
         <div class="flex-vertical">
             <div class="flex-horizontal">
                 <label style="margin-right: 16px">Last sync: </label>
@@ -4744,12 +4744,12 @@ var carousel_pages = [
             </div>
         </div>
         <form class="server-form">
-            <div style="margin-top: 40px" class="button" onclick="stats_status_page.syncPressed()">Sync</div>
+            <div style="margin-top: 40px" class="button" onclick="sync_stats_page.syncPressed()">Sync</div>
         </form>
         <div id="sync-progress">Syncing....</div>
 
     </div>
-    <div id="no-stats-status-page" style="display:none">
+    <div id="no-sync-stats-page" style="display:none">
         <h2>No stats</h2>
         <span>Stats are only available for users that are logged in. Please login view the status of your stats.</span>
         <form class="server-form">
@@ -4760,46 +4760,46 @@ var carousel_pages = [
 </div>
 
 <script>
-    var stats_status_page = new StatsStatusPage();
-    stats_status_page.isSyncing = false;
-    GLOBAL_JS_PAGE_OBJECTS["stats-status"] = {id:"page-stats-status", obj:stats_status_page};
+    var sync_stats_page = new SyncStatsPage();
+    sync_stats_page.isSyncing = false;
+    GLOBAL_JS_PAGE_OBJECTS["sync-stats"] = {id:"page-sync-stats", obj:sync_stats_page};
 
     /*--------------------------------------------------------*/
-    function StatsStatusPage() {
+    function SyncStatsPage() {
 
     }
 
     /*--------------------------------------------------------*/
-    StatsStatusPage.prototype.page_will_unload = function() {
+    SyncStatsPage.prototype.page_will_unload = function() {
 
     };
 
     /*--------------------------------------------------------*/
-    StatsStatusPage.prototype.page_load = function() {
+    SyncStatsPage.prototype.page_load = function() {
         ViewUtil.scrollToTopOfPage();
         if (!this.googleAnalyticsService) {
             this.googleAnalyticsService = new GoogleAnalyticsService();
         }
-        this.googleAnalyticsService.pageLoaded(GoogleAnalyticsService.PAGE_NAME_STATS_STATUS);
+        this.googleAnalyticsService.pageLoaded(GoogleAnalyticsService.PAGE_NAME_SYNC_STATS);
 
         if (NetworkService.isUserLoggedIn()) {
-            document.getElementById("no-stats-status-page").style.display = "none";
-            document.getElementById("main-stats-status-page").style.display = null;
-            stats_status_page._updateSyncingDisplay();
-            stats_status_page._loadSyncData();
+            document.getElementById("no-sync-stats-page").style.display = "none";
+            document.getElementById("main-sync-stats-page").style.display = null;
+            sync_stats_page._updateSyncingDisplay();
+            sync_stats_page._loadSyncData();
         } else {
-            document.getElementById("main-stats-status-page").style.display = "none";
-            document.getElementById("no-stats-status-page").style.display = null;
+            document.getElementById("main-sync-stats-page").style.display = "none";
+            document.getElementById("no-sync-stats-page").style.display = null;
         }
     };
 
     /*--------------------------------------------------------*/
-    StatsStatusPage.prototype.page_did_unload = function() {
+    SyncStatsPage.prototype.page_did_unload = function() {
 
     };
 
     /*--------------------------------------------------------*/
-    StatsStatusPage.prototype.syncPressed = function() {
+    SyncStatsPage.prototype.syncPressed = function() {
         var self = this;
         if (!self.isSyncing) {
             var successfulSync = true;
@@ -4827,7 +4827,7 @@ var carousel_pages = [
                     })
                     .finally(function() {
                         self.isSyncing = false;
-                        stats_status_page._loadSyncData();
+                        sync_stats_page._loadSyncData();
                         self._updateSyncingDisplay();
                     })
             } else {
@@ -4838,7 +4838,7 @@ var carousel_pages = [
     };
 
     /*--------------------------------------------------------*/
-    StatsStatusPage.prototype._updateSyncingDisplay = function() {
+    SyncStatsPage.prototype._updateSyncingDisplay = function() {
         if (this.isSyncing) {
             document.getElementById("sync-progress").style.display = null;
         } else {
@@ -4847,7 +4847,7 @@ var carousel_pages = [
     };
 
     /*--------------------------------------------------------*/
-    StatsStatusPage.prototype._loadSyncData = function() {
+    SyncStatsPage.prototype._loadSyncData = function() {
         var unsyncedSessions = StatsService.getNumberOfTempStatsSessions();
         document.getElementById("number_of_unsynced_sessions").innerHTML = unsyncedSessions;
 
@@ -4855,13 +4855,13 @@ var carousel_pages = [
         var lastPushTime = StatsService.getLastPushTime();
 
         if (lastPushTime > lastFetchTime) {
-            stats_status_page._showSyncTime(lastFetchTime);
+            sync_stats_page._showSyncTime(lastFetchTime);
         } else {
-            stats_status_page._showSyncTime(lastPushTime);
+            sync_stats_page._showSyncTime(lastPushTime);
         }
     };
 
-    StatsStatusPage.prototype._showSyncTime = function(syncTime) {
+    SyncStatsPage.prototype._showSyncTime = function(syncTime) {
         if (!syncTime) {
             document.getElementById("last_sync_date").innerHTML = "Never";
         } else {
@@ -5188,7 +5188,7 @@ var carousel_pages = [
 
 <script>
 
-var $VERSION = "20 May 2018 22:49:02";
+var $VERSION = "21 May 2018 3:36:31";
 
 /**** ALL JS ****/
 var $ROUTINES = {"Toe Taps":{"type":"rollkick","video":"videos\/toe_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 140 taps  in 1 minute","type":"x_in_y","count":140,"duration":60},{"name":"Do 320 taps  in 3 minutes","type":"x_in_y","count":320,"duration":180},{"name":"Do 550 taps  in 5 minutes","type":"x_in_y","count":550,"duration":300}]},"Ball Taps Clock":{"type":"rollkick","video":"videos\/ball_taps_clock.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 130 taps  in 1 minute","type":"x_in_y","count":130,"duration":60},{"name":"Do 330 taps  in 3 minutes","type":"x_in_y","count":330,"duration":180},{"name":"Do 460 taps  in 5 minutes","type":"x_in_y","count":460,"duration":300}]},"Brazilian Sole Flicks":{"type":"rollkick","video":"videos\/brazilian_sole_flicks.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":20,"min_duration":0.3,"speedometer_num_text":"FLICKS","speedometer_level_text":"flicks","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 110 taps  in 1 minute","type":"x_in_y","count":110,"duration":60},{"name":"Do 250 taps  in 3 minutes","type":"x_in_y","count":250,"duration":180},{"name":"Do 430 taps  in 5 minutes","type":"x_in_y","count":430,"duration":300}]},"Forward Backward Rolls":{"type":"rollkick","video":"videos\/forward_backward_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 130 taps  in 3 minutes","type":"x_in_y","count":130,"duration":180},{"name":"Do 240 taps  in 5 minutes","type":"x_in_y","count":240,"duration":300}]},"Left Right Front Rolls":{"type":"rollkick","video":"videos\/left_right_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 90 taps  in 3 minutes","type":"x_in_y","count":90,"duration":180},{"name":"Do 170 taps  in 5 minutes","type":"x_in_y","count":170,"duration":300}]},"Pull Back Taps":{"type":"rollkick","video":"videos\/pull_back_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":4,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 15 taps  in 1 minute","type":"x_in_y","count":15,"duration":60},{"name":"Do 40 taps  in 3 minutes","type":"x_in_y","count":40,"duration":180},{"name":"Do 90 taps  in 5 minutes","type":"x_in_y","count":90,"duration":300}]},"Irish Jig":{"type":"rollkick","video":"videos\/irish_jig.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 110 taps  in 1 minute","type":"x_in_y","count":110,"duration":60},{"name":"Do 215 taps  in 3 minutes","type":"x_in_y","count":220,"duration":180},{"name":"Do 395 taps  in 5 minutes","type":"x_in_y","count":400,"duration":300}]},"Single Leg V Taps":{"type":"rollkick","video":"videos\/single_leg_v_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"Vs","speedometer_level_text":"vs","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 10 taps  in 1 minute","type":"x_in_y","count":10,"duration":60},{"name":"Do 25 taps  in 3 minutes","type":"x_in_y","count":25,"duration":180},{"name":"Do 50 taps  in 5 minutes","type":"x_in_y","count":50,"duration":300}]},"Wall Kicks":{"type":"rollkick","video":"videos\/wall_kicks.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.3,"speedometer_num_text":"KICKS","speedometer_level_text":"kicks","divide_by":1,"mode":1,"menu_parent":"Kicks","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 110 taps  in 3 minutes","type":"x_in_y","count":110,"duration":180},{"name":"Do 160 taps  in 5 minutes","type":"x_in_y","count":160,"duration":300}]},"Penalty Kicks":{"type":"flightkick","video":"videos\/penalty_kicks.mp4","menu_parent":"Kicks","flightkick_mode":"freekick"},"In Out Dribbling":{"type":"cones","video":"videos\/in_out_dribbling.mp4","menu_parent":"Dribbling"},"Virtual Coach":{"type":"freeplay","video":"videos\/free_play.mp4","menu_parent":"Dribbling"},"2-Person Passes":{"type":"rollkick","video":"videos\/2_person_passes.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.5,"speedometer_num_text":"PASSES","speedometer_level_text":"passes","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Funny Sounds":{"type":"funny sounds","menu_parent":"Dribbling"},"Passkick":{"type":"passkick","menu_parent":"Kicks"},"Topspin":{"type":"topspin","menu_parent":"Kicks"},"Force Kick":{"type":"forcekick","menu_parent":"Kicks"}};
@@ -9701,7 +9701,7 @@ $(window).one('load',function(){
 
 	var numberUnsyncedSessions = StatsService.getNumberOfTempStatsSessions();
 	if (numberUnsyncedSessions > 0) {
-        $.notify("You have unsynced sessions. Go to the Stats Status page to sync.", {style:"ic"});
+        $.notify("You have unsynced sessions. Go to the Sync Stats page to sync.", {style:"ic"});
     }
 	IC_APP.run(carousel.has_been_fully_viewed() ? (NetworkService.isUserLoggedIn() ? '#/games' : '#/login' ) : '#/setup-guide');
 });

@@ -30,15 +30,15 @@ GamesService.getGames = function() {
     games.push((new Game("Forward Backward Rolls", GameTypes.GAME_TYPE_FORWARD_BACKWARD_ROLLS, 4)));
     games.push((new Game("Left Right Front Rolls", GameTypes.GAME_TYPE_LEFT_RIGHT_FRONT_ROLLS, 5)));
     games.push((new Game("Pull Back Taps Rolls", GameTypes.GAME_TYPE_PULL_BACK_TAPS_ROLLS, 7)));
-    games.push((new Game("Irish Jig", GameTypes.GAME_TYPE_IRISH_JIG, 15))); //TODO not real
+    games.push((new Game("Irish Jig", GameTypes.GAME_TYPE_IRISH_JIG, 15)));
     games.push((new Game("Single Leg V Taps", GameTypes.GAME_TYPE_SINGLE_LEG_V_TAPS, 6)));
 
     games.push((new Game("Wall Kicks", GameTypes.GAME_TYPE_WALL_KICKS, 8)));
     games.push((new Game("Penalty Kicks", GameTypes.GAME_TYPE_PENALTY_KCIKS, 9)));
     games.push((new Game("2-Person Passes", GameTypes.GAME_TYPE_2_PERSON_PASSES, 12)));
-    games.push((new Game("Passkick", GameTypes.GAME_TYPE_PASSKICK, 16))); //TODO not real
-    games.push((new Game("Topspin", GameTypes.GAME_TYPE_TOPSPIN, 17))); //TODO not real
-    games.push((new Game("Force Kick", GameTypes.GAME_TYPE_FORCE_KICK, 18))); //TODO not real
+    games.push((new Game("Passkick", GameTypes.GAME_TYPE_PASSKICK, 16)));
+    games.push((new Game("Topspin", GameTypes.GAME_TYPE_TOPSPIN, 17)));
+    games.push((new Game("Force Kick", GameTypes.GAME_TYPE_FORCE_KICK, 18)));
 
     //TODO volley kick 10
     //TODO drop kick 11
