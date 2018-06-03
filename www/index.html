@@ -4572,12 +4572,12 @@ var carousel_pages = [
   }
 </script>
 <div class="page" id="routine-cones">
-
-<div class="video_modal_container" onclick="cone_weaving_template.video_modal.show_modal()">&nbsp;WATCH TRAINING</div><br>
-  <div class="speech_log_widget" id="speech_log_page_c">Start when you are ready!</div><br>
-  <canvas id="ball_position_page_c" class="ball_position_widget" width="900" height="600"></canvas><br>
-  <div class="server-form"><button class="input-field button" onclick="cone_weaving_template.clear();$IC.start_tracking();">RESET GAME</button></div>
-  <table id="score_log_page_c" class="socore_log_widget"></table>
+    <div class="video_modal_container" onclick="cone_weaving_template.onWatchSetupClicked()">&nbsp;WATCH SETUP</div>
+    <div class="video_modal_container" onclick="cone_weaving_template.onWatchTrainingClicked()">&nbsp;WATCH TRAINING</div><br>
+    <div class="speech_log_widget" id="speech_log_page_c">Start when you are ready!</div><br>
+    <canvas id="ball_position_page_c" class="ball_position_widget" width="900" height="600"></canvas><br>
+    <div class="server-form"><button class="input-field button" onclick="cone_weaving_template.clear();$IC.start_tracking();">RESET GAME</button></div>
+    <table id="score_log_page_c" class="socore_log_widget"></table>
 </div> <!-- page routine-cones -->
 
 <script>
@@ -5218,10 +5218,10 @@ var carousel_pages = [
 
 <script>
 
-var $VERSION = "02 Jun 2018 23:35:45";
+var $VERSION = "03 Jun 2018 0:05:37";
 
 /**** ALL JS ****/
-var $ROUTINES = {"Toe Taps":{"type":"rollkick","video":"videos\/toe_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 140 taps  in 1 minute","type":"x_in_y","count":140,"duration":60},{"name":"Do 320 taps  in 3 minutes","type":"x_in_y","count":320,"duration":180},{"name":"Do 550 taps  in 5 minutes","type":"x_in_y","count":550,"duration":300}]},"Ball Taps Clock":{"type":"rollkick","video":"videos\/ball_taps_clock.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 130 taps  in 1 minute","type":"x_in_y","count":130,"duration":60},{"name":"Do 330 taps  in 3 minutes","type":"x_in_y","count":330,"duration":180},{"name":"Do 460 taps  in 5 minutes","type":"x_in_y","count":460,"duration":300}]},"Brazilian Sole Flicks":{"type":"rollkick","video":"videos\/brazilian_sole_flicks.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":20,"min_duration":0.3,"speedometer_num_text":"FLICKS","speedometer_level_text":"flicks","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 110 taps  in 1 minute","type":"x_in_y","count":110,"duration":60},{"name":"Do 250 taps  in 3 minutes","type":"x_in_y","count":250,"duration":180},{"name":"Do 430 taps  in 5 minutes","type":"x_in_y","count":430,"duration":300}]},"Forward Backward Rolls":{"type":"rollkick","video":"videos\/forward_backward_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 130 taps  in 3 minutes","type":"x_in_y","count":130,"duration":180},{"name":"Do 240 taps  in 5 minutes","type":"x_in_y","count":240,"duration":300}]},"Left Right Front Rolls":{"type":"rollkick","video":"videos\/left_right_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 90 taps  in 3 minutes","type":"x_in_y","count":90,"duration":180},{"name":"Do 170 taps  in 5 minutes","type":"x_in_y","count":170,"duration":300}]},"Pull Back Taps":{"type":"rollkick","video":"videos\/pull_back_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":4,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 15 taps  in 1 minute","type":"x_in_y","count":15,"duration":60},{"name":"Do 40 taps  in 3 minutes","type":"x_in_y","count":40,"duration":180},{"name":"Do 90 taps  in 5 minutes","type":"x_in_y","count":90,"duration":300}]},"Irish Jig":{"type":"rollkick","video":"videos\/irish_jig.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 110 taps  in 1 minute","type":"x_in_y","count":110,"duration":60},{"name":"Do 215 taps  in 3 minutes","type":"x_in_y","count":220,"duration":180},{"name":"Do 395 taps  in 5 minutes","type":"x_in_y","count":400,"duration":300}]},"Single Leg V Taps":{"type":"rollkick","video":"videos\/single_leg_v_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"Vs","speedometer_level_text":"vs","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 10 taps  in 1 minute","type":"x_in_y","count":10,"duration":60},{"name":"Do 25 taps  in 3 minutes","type":"x_in_y","count":25,"duration":180},{"name":"Do 50 taps  in 5 minutes","type":"x_in_y","count":50,"duration":300}]},"Wall Kicks":{"type":"rollkick","video":"videos\/wall_kicks.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.3,"speedometer_num_text":"KICKS","speedometer_level_text":"kicks","divide_by":1,"mode":1,"menu_parent":"Kicks","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 110 taps  in 3 minutes","type":"x_in_y","count":110,"duration":180},{"name":"Do 160 taps  in 5 minutes","type":"x_in_y","count":160,"duration":300}]},"Penalty Kicks":{"type":"flightkick","video":"videos\/penalty_kicks.mp4","menu_parent":"Kicks","flightkick_mode":"freekick"},"In Out Dribbling":{"type":"cones","video":"videos\/in_out_dribbling.mp4","menu_parent":"Dribbling"},"Virtual Coach":{"type":"freeplay","video":"videos\/free_play.mp4","menu_parent":"Dribbling"},"2-Person Passes":{"type":"rollkick","video":"videos\/2_person_passes.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.5,"speedometer_num_text":"PASSES","speedometer_level_text":"passes","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Funny Sounds":{"type":"funny sounds","menu_parent":"Dribbling"},"Passkick":{"type":"passkick","menu_parent":"Kicks"},"Topspin":{"type":"topspin","menu_parent":"Kicks"},"Force Kick":{"type":"forcekick","menu_parent":"Kicks"}};
+var $ROUTINES = {"Toe Taps":{"type":"rollkick","video":"videos\/toe_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 140 taps  in 1 minute","type":"x_in_y","count":140,"duration":60},{"name":"Do 320 taps  in 3 minutes","type":"x_in_y","count":320,"duration":180},{"name":"Do 550 taps  in 5 minutes","type":"x_in_y","count":550,"duration":300}]},"Ball Taps Clock":{"type":"rollkick","video":"videos\/ball_taps_clock.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 130 taps  in 1 minute","type":"x_in_y","count":130,"duration":60},{"name":"Do 330 taps  in 3 minutes","type":"x_in_y","count":330,"duration":180},{"name":"Do 460 taps  in 5 minutes","type":"x_in_y","count":460,"duration":300}]},"Brazilian Sole Flicks":{"type":"rollkick","video":"videos\/brazilian_sole_flicks.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":20,"min_duration":0.3,"speedometer_num_text":"FLICKS","speedometer_level_text":"flicks","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 110 taps  in 1 minute","type":"x_in_y","count":110,"duration":60},{"name":"Do 250 taps  in 3 minutes","type":"x_in_y","count":250,"duration":180},{"name":"Do 430 taps  in 5 minutes","type":"x_in_y","count":430,"duration":300}]},"Forward Backward Rolls":{"type":"rollkick","video":"videos\/forward_backward_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 130 taps  in 3 minutes","type":"x_in_y","count":130,"duration":180},{"name":"Do 240 taps  in 5 minutes","type":"x_in_y","count":240,"duration":300}]},"Left Right Front Rolls":{"type":"rollkick","video":"videos\/left_right_rolls.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TOUCHES","speedometer_level_text":"touches","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 90 taps  in 3 minutes","type":"x_in_y","count":90,"duration":180},{"name":"Do 170 taps  in 5 minutes","type":"x_in_y","count":170,"duration":300}]},"Pull Back Taps":{"type":"rollkick","video":"videos\/pull_back_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":4,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 15 taps  in 1 minute","type":"x_in_y","count":15,"duration":60},{"name":"Do 40 taps  in 3 minutes","type":"x_in_y","count":40,"duration":180},{"name":"Do 90 taps  in 5 minutes","type":"x_in_y","count":90,"duration":300}]},"Irish Jig":{"type":"rollkick","video":"videos\/irish_jig.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":4,"min_duration":0.3,"speedometer_num_text":"TAPS","speedometer_level_text":"taps","divide_by":1,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 110 taps  in 1 minute","type":"x_in_y","count":110,"duration":60},{"name":"Do 215 taps  in 3 minutes","type":"x_in_y","count":220,"duration":180},{"name":"Do 395 taps  in 5 minutes","type":"x_in_y","count":400,"duration":300}]},"Single Leg V Taps":{"type":"rollkick","video":"videos\/single_leg_v_taps.mp4","gyro_motion_thresh":0.04,"impact_sensitivity":15,"min_duration":0.3,"speedometer_num_text":"Vs","speedometer_level_text":"vs","divide_by":2,"mode":0,"menu_parent":"Fundamentals","challenges":[{"name":"Do 10 taps  in 1 minute","type":"x_in_y","count":10,"duration":60},{"name":"Do 25 taps  in 3 minutes","type":"x_in_y","count":25,"duration":180},{"name":"Do 50 taps  in 5 minutes","type":"x_in_y","count":50,"duration":300}]},"Wall Kicks":{"type":"rollkick","video":"videos\/wall_kicks.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.3,"speedometer_num_text":"KICKS","speedometer_level_text":"kicks","divide_by":1,"mode":1,"menu_parent":"Kicks","challenges":[{"name":"Do 40 taps  in 1 minute","type":"x_in_y","count":40,"duration":60},{"name":"Do 110 taps  in 3 minutes","type":"x_in_y","count":110,"duration":180},{"name":"Do 160 taps  in 5 minutes","type":"x_in_y","count":160,"duration":300}]},"Penalty Kicks":{"type":"flightkick","video":"videos\/penalty_kicks.mp4","menu_parent":"Kicks","flightkick_mode":"freekick"},"In Out Dribbling":{"type":"cones","video":"videos\/in_out_dribbling.mp4","setup_video":"videos\/in_out_set_up.mp4","menu_parent":"Dribbling"},"Virtual Coach":{"type":"freeplay","video":"videos\/free_play.mp4","menu_parent":"Dribbling"},"2-Person Passes":{"type":"rollkick","video":"videos\/2_person_passes.mp4","gyro_motion_thresh":0.05,"impact_sensitivity":40,"min_duration":0.5,"speedometer_num_text":"PASSES","speedometer_level_text":"passes","divide_by":1,"mode":1,"menu_parent":"Kicks"},"Funny Sounds":{"type":"funny sounds","menu_parent":"Dribbling"},"Passkick":{"type":"passkick","menu_parent":"Kicks"},"Topspin":{"type":"topspin","menu_parent":"Kicks"},"Force Kick":{"type":"forcekick","menu_parent":"Kicks"}};
 /*!
  * Chart.js
  * http://chartjs.org/
@@ -6733,8 +6733,6 @@ Video_Modal_Widget.prototype.set_video = function(video_path)
 {
     var self = this;
 
-    console.log("Setting video");
-    console.log("video path: " + video_path);
     document.getElementById("video_id").src = video_path;
     document.getElementById("video_id").load();
 
@@ -6841,7 +6839,6 @@ Rollkick_Page_Template.prototype.page_load = function(name, video_path, kicks_le
 {
     ViewUtil.scrollToTopOfPage();
 
-    console.log("roll kick videoPath: " + video_path);
   this.video_modal.set_video(video_path);
   var column_names = ["Start Time", "End Time", "Minutes", kicks_num_text, "Avg Duration", "Duration Variance", "Avg Force", "Force Variance", "Avg Distance", "Dist Variance", "session_count", "count_type", "session_duration"];
   this.score_log.set_game_name(name, column_names);
@@ -7492,7 +7489,6 @@ Flightkick_Page_Template.prototype.page_load = function(name, video_path)
 {
     ViewUtil.scrollToTopOfPage();
 
-    console.log("videopath: " + video_path);
   this.video_modal.set_video(video_path);
   
   this.score_log.set_game_name(name);
@@ -7970,11 +7966,13 @@ Cone_Weaving_Page_Template.prototype.clear = function()
   
   
 /*--------------------------------------------------------------------*/
-Cone_Weaving_Page_Template.prototype.page_load = function(name, video_path, speedometer_level_text, speedometer_num_text)
+Cone_Weaving_Page_Template.prototype.page_load = function(name, video_path, setup_video, speedometer_level_text, speedometer_num_text)
 {
+    console.log("page load... from where?");
     ViewUtil.scrollToTopOfPage();
 
-  this.video_modal.set_video(video_path);
+  this.video_path = video_path;
+  this.setup_video = setup_video;
   this.score_log.set_game_name(name);
   this.speech_log.prime();
   this.clear();
@@ -7998,6 +7996,21 @@ Cone_Weaving_Page_Template.prototype.page_did_unload = function()
 {
 
 };
+
+Cone_Weaving_Page_Template.prototype.onWatchTrainingClicked = function(e)
+{
+    this.video_modal.set_video(this.video_path);
+    this.video_modal.show_modal()
+
+};
+
+Cone_Weaving_Page_Template.prototype.onWatchSetupClicked = function(e)
+{
+    this.video_modal.set_video(this.setup_video);
+    this.video_modal.show_modal()
+
+};
+
 
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
@@ -8296,7 +8309,7 @@ function navigation_load_routine(routine_name)
 
   else if(routine.type == 'cones')
     {
-      new_page.obj.page_load(routine_name, routine_video_url);
+      new_page.obj.page_load(routine_name, routine_video_url, routine.setup_video);
     }
 
   else if(routine.type == 'freeplay')
