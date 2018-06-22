@@ -75,6 +75,10 @@ NetworkService.doHttpCallAsync = function(type, url, params) {
                 resolve(msg);
             },
             error: function(msg, ajax_options, thrown_error) {
+
+
+                $.notify("Test error: " + msg, {style:"ic"});
+
                 //TODO think about if the token is expired. Maybe log the user out?
                 console.log("ERROR!!");
                 reject(msg);
